@@ -3,9 +3,9 @@
 // Company: 
 // Engineer: 
 // 
-// Create Date: 12/09/2021 07:33:42 PM
+// Create Date: 12/09/2022 12:33:42 PM
 // Design Name: 
-// Module Name: floatToStr
+// Module Name: intToStr
 // Project Name: 
 // Target Devices: 
 // Tool Versions: 
@@ -19,47 +19,32 @@
 // 
 //////////////////////////////////////////////////////////////////////////////////
 
-
-module floatToStr(
-    input signed [63:0]  float,
+module intToStr(
+    input signed [31:0]  float,
     output       [7:0]   signbuffer,
-    output       [47:0]  outputbufferBFD,
-    output       [47:0]  outputbufferAFD,
+    output       [31:0]  outputValBuffer,
     output reg           validout
     );
     
-    reg signed  [63:0]  f1,f2;
-    reg signed  [7:0]   a1,a2,a3,a4,a5,a6;
-    wire        [15:0]  o1,o2,o3,o4,o5,o6;
+    reg signed  [31:0]  f;
+    reg signed  [7:0]   a1,a2;
+    wire        [15:0]  o1,o2;
     wire                negative;
     
-    assign negative         = float[63];
+    assign negative         = float[31];
     assign signbuffer       = (negative)? 8'h2D: 8'h2B;
-    assign outputbufferBFD  = {o1,o2,o3};
-    assign outputbufferAFD  = {o4,o5,o6};
-    
+    assign outputValBuffer  = {o1,o2};
+
     intToChar2 i2c1(a1, o1);
     intToChar2 i2c2(a2, o2);
-    intToChar2 i2c3(a3, o3);
-    intToChar2 i2c4(a4, o4);
-    intToChar2 i2c5(a5, o5);
-    intToChar2 i2c6(a6, o6);
     
     always @(float) begin
-        f1 = float;
-        if(negative) f1 = -float;
+        f = float;
+        if(negative) f = -float;
         
-        f1 = f1/1000000;
-        f2 = float - f1*1000000;
-        if(negative) f2 = -float - f1*1000000;
-        
-        a1 = f1/10000; f1 = f1-a1*10000;
-        a2 = f1/100;
-        a3 = f1-a2*100;
-        a4 = f2/10000; f2 = f2-a4*10000;
-        a5 = f2/100;
-        a6 = f2-a5*100;
-        if(a1>=$signed(8'd100)) validout = 0;
+        a1 = f/100; f = f-a1*100;
+        a2 = f;
+        if(float>=10000 || float<=-10000) validout = 0;
         else validout = 1;
     end
 endmodule
